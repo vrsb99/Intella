@@ -3,5 +3,8 @@ channels:
   - defaults
 dependencies:
   - python=3.10.8
-  - flask=2.2.2
-  - flask-sqlalchemy=3.0.2
+  - flask
+  - flask-sqlalchemy
+  - beautifulsoup4
+  - lxml
+  - requests
