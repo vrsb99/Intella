@@ -13,45 +13,57 @@ conn = sqlite3.connect('../../instance/products.db')
 curs = conn.cursor()
 
 def main():
-    for product in products:
+    # Reset database
+    curs.execute('DELETE FROM products')
+    conn.commit()
+    
+    for idx, product in enumerate(products):
         print('\nNTUC:')
-        get_price_ntuc(product)
+        get_price_ntuc(idx, product)
         print('\nCOLD STORAGE:')
-        get_price_cold_storage(product)
-        print('\nIsetan:', end='')
-        get_price_isetan(product)
+        get_price_cold_storage(idx,product)
+        print('\nIsetan:')
+        get_price_isetan(idx,product)
+        
         
 # Get price for products from NTUC
-def get_price_ntuc(item):
+def get_price_ntuc(idx, item):
     # Get html text from website
     html_text = requests.get(ntuc + item).text
     soup = BeautifulSoup(html_text, 'lxml')
+    matches = [4, 0, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:
         products = soup.find_all('div', class_='sc-1plwklf-0 iknXK product-container')
-        for product in products:
+        for index, product in enumerate(products):
             name = product.find('span', class_ = 'sc-1bsd7ul-1 eJoyLL').text
             
             # Check if product name contains the item
             if item.split()[0].lower() in name.lower().replace(' ', ''): 
-                price = product.find('span', class_ = 'sc-1bsd7ul-1 sc-1svix5t-1 gJhHzP biBzHY').text
+                price = product.find('span', class_ = 'sc-1bsd7ul-1 sc-1svix5t-1 gJhHzP biBzHY').text.replace('$', '')
                 weight = product.find('span', class_ = 'sc-1bsd7ul-1 eeyOqy').text
-                print(f'{name} costs {price} for {weight}')
+                
+                print(f'{index}: {name} costs {price} for {weight}')
+
+                if matches[idx] == index:
+                    print('Match found')
+                    insert_database(name, price, 'NTUC', idx)
     except:
         print('No products found')
 
 
 # Get price for products from Cold Storage
-def get_price_cold_storage(item):
+def get_price_cold_storage(idx, item):
     # Get html text from website
     html_text = requests.get(cold_storage + item).text
     soup = BeautifulSoup(html_text, 'lxml')
+    matches = [3, 1, 0, 0, 1, 0]
     
     # Get product name, price and weight
     try:
         products = soup.find_all('div', class_='product_box')
-        for product in products:
+        for index, product in enumerate(products):
             cat = product.find('b').text
             name = product.find('div', class_ = 'product_name').text.replace(' ', '')
             
@@ -67,34 +79,53 @@ def get_price_cold_storage(item):
                     except:
                         price = product.find('div', class_ = 'price_now price-buy price_normal').text
                     
+                price = price.replace('$', '')
                 weight = product.find('span', class_ = 'size').text
-                print(f'{cat} - {name} costs {price} for {weight}')
+                
+                print(f'{index}: {cat} - {name} costs {price} for {weight}')
+                
+                if matches[idx] == index:
+                    print('Match found')
+                    insert_database(name, price, 'Cold Storage', idx)
     except:
         print('No products found')
     
   
         
-def get_price_isetan(item):
+def get_price_isetan(idx, item):
     pass
     # product-price
     # Get html text from website
     html_text = requests.get(isetan + item).text
     soup = BeautifulSoup(html_text, 'lxml')
+    # matches = [0, 0, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:
         products = soup.find_all('li', class_='item product product-item')
-        for product in products:
+        for index, product in enumerate(products):
             name = product.find('a', class_ = 'product-item-link').text.replace(' ', '')
             
             # Check if product name contains the item
             if item.split()[0].lower() in name.lower(): 
-                price = product.find('span', class_ = 'price').text.replace('SG$', '$')
-                print(f'{name} costs {price}', end=' ')
+                price = product.find('span', class_ = 'price').text.replace('SG$', '')
+                
+                print(f'{index}: {name} costs {price}')
+                
+                if index == 0:
+                    print('Match found')
+                    insert_database(name, price, 'Isetan', idx)
+                
+                
     except:
         print('No products found')
-    print('')
-        
+
+     
+def insert_database(productName, store, price, productID):
+    # Insert into database
+    print("Writing to database")
+    curs.execute('INSERT INTO products(productName, store, price, productID) VALUES (?, ?, ?, ?)', (productName, store, price, productID))
+    conn.commit()
                                                     
 if __name__ == '__main__':
     main()
