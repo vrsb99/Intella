@@ -48,7 +48,7 @@ def get_price_ntuc(idx, item):
 
                 if matches[idx] == index:
                     print('Match found')
-                    insert_database(name, price, 'NTUC', idx)
+                    insert_database(name, 'NTUC', price, idx)
     except:
         print('No products found')
 
@@ -86,7 +86,7 @@ def get_price_cold_storage(idx, item):
                 
                 if matches[idx] == index:
                     print('Match found')
-                    insert_database(name, price, 'Cold Storage', idx)
+                    insert_database(name, 'Cold Storage', price, idx)
     except:
         print('No products found')
     
@@ -114,7 +114,7 @@ def get_price_isetan(idx, item):
                 
                 if index == 0:
                     print('Match found')
-                    insert_database(name, price, 'Isetan', idx)
+                    insert_database(name, 'Isetan', price, idx)
                 
                 
     except:
