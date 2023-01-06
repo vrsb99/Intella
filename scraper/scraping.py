@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from colorama import Fore, Style
 import requests
 import sqlite3
 
@@ -28,11 +29,11 @@ def main():
         curs.execute('INSERT INTO products (product_name) VALUES (?)', (product.capitalize(),))
         conn.commit()
         
-        print('\nNTUC:')
+        print(Fore.MAGENTA + '\nNTUC:')
         get_price_ntuc(idx, product)
-        print('\nCOLD STORAGE:')
+        print(Fore.MAGENTA + '\nCOLD STORAGE:')
         get_price_cold_storage(idx,product)
-        print('\nIsetan:')
+        print(Fore.MAGENTA + '\nIsetan:')
         get_price_isetan(idx,product)
         
         
@@ -41,7 +42,7 @@ def get_price_ntuc(idx, item):
     # Get html text from website
     html_text = requests.get(ntuc + item).text
     soup = BeautifulSoup(html_text, 'lxml')
-    matches = [0, 2, 0, 0, 0, 0]
+    matches = [4, 2, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:
@@ -54,11 +55,11 @@ def get_price_ntuc(idx, item):
                 price = product.find('span', class_ = 'sc-1bsd7ul-1 sc-1svix5t-1 gJhHzP biBzHY').text.replace('$', '')
                 weight = product.find('span', class_ = 'sc-1bsd7ul-1 eeyOqy').text
                 
-                print(f'{index}: {name} costs {price} for {weight}')
+                print(Fore.WHITE + f'{index}: {name} costs {price} for {weight}')
 
-                if matches[idx] == index:
-                    print('Match found')
-                    insert_database(idx, 0, price)
+                match_found(matches, idx, index, 0, price)
+            else:
+                print(Fore.RED + 'Basic match not found')
     except:
         print('No products found')
 
@@ -92,11 +93,11 @@ def get_price_cold_storage(idx, item):
                 price = price.replace('$', '')
                 weight = product.find('span', class_ = 'size').text
                 
-                print(f'{index}: {cat} - {name} costs {price} for {weight}')
+                print(Fore.WHITE + f'{index}: {cat} - {name} costs {price} for {weight}')
                 
-                if matches[idx] == index:
-                    print('Match found')
-                    insert_database(idx, 1, price)
+                match_found(matches, idx, index, 1, price)
+            else:
+                print(Fore.RED + 'Basic match not found')
     except:
         print('No products found')
     
@@ -108,7 +109,7 @@ def get_price_isetan(idx, item):
     # Get html text from website
     html_text = requests.get(isetan + item).text
     soup = BeautifulSoup(html_text, 'lxml')
-    # matches = [0, 0, 0, 0, 0, 0]
+    matches = [0, 0, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:
@@ -120,32 +121,42 @@ def get_price_isetan(idx, item):
             if item.split()[0].lower() in name.lower(): 
                 price = product.find('span', class_ = 'price').text.replace('SG$', '')
                 
-                print(f'{index}: {name} costs {price}')
+                print(Fore.WHITE + f'{index}: {name} costs {price}')
                 
-                if index == 0:
-                    print('Match found')
-                    insert_database(idx, 2, price)
-                
-                
+                match_found(matches, idx, index, 2, price)
+            else:
+                print(Fore.RED + 'Basic match not found')
+                    
     except:
         print('No products found')
 
-     
+        
+def match_found(matches, idx, index, store, price):
+    if matches[idx] == index:
+                    print(Fore.YELLOW + 'Advanced Match found')
+                    insert_database(idx, store, price)
+                                    
 def insert_database(product_id, store, price):
-    print("Writing to database")
-    curs.execute('INSERT INTO prices(product_id, store_id, price) VALUES (?, ?, ?)', (product_id, store, price))
-    conn.commit()
+    try:
+        curs.execute('INSERT INTO prices(product_id, store_id, price) VALUES (?, ?, ?)', (product_id, store, price))
+        conn.commit()
+        print(Fore.GREEN + "Written to database")
+    except:
+        print(Fore.RED + "Error writing to database")
     
 def reset_database():
-    curs.execute('DROP TABLE IF EXISTS products')
-    curs.execute('DROP TABLE IF EXISTS stores')
-    curs.execute('DROP TABLE IF EXISTS prices')
-    conn.commit()
-    curs.execute('CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY, product_name TEXT NOT NULL)')
-    curs.execute('CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY, store_name TEXT NOT NULL)')
-    curs.execute('CREATE TABLE prices (id INTEGER NOT NULL PRIMARY KEY, product_id INTEGER NOT NULL, store_id INTEGER NOT NULL, price NUMERIC NOT NULL, FOREIGN KEY(product_id) REFERENCES products(id), FOREIGN KEY(store_id) REFERENCES stores(id))')
-    conn.commit()
-    
-                                                    
+    try:
+        curs.execute('DROP TABLE IF EXISTS products')
+        curs.execute('DROP TABLE IF EXISTS stores')
+        curs.execute('DROP TABLE IF EXISTS prices')
+        conn.commit()
+        curs.execute('CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY, product_name TEXT NOT NULL)')
+        curs.execute('CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY, store_name TEXT NOT NULL)')
+        curs.execute('CREATE TABLE prices (id INTEGER NOT NULL PRIMARY KEY, product_id INTEGER NOT NULL, store_id INTEGER NOT NULL, price NUMERIC NOT NULL, FOREIGN KEY(product_id) REFERENCES products(id), FOREIGN KEY(store_id) REFERENCES stores(id))')
+        conn.commit()
+        print(Fore.GREEN + "Database reset")
+    except:
+        print(Fore.RED + "Error resetting database")
+
 if __name__ == '__main__':
     main()
