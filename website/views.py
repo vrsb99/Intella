@@ -26,6 +26,7 @@ def homepage():
             return redirect('/')
         
         products = products[:int(number_of_products)+1]
+        
     # Obtain list of all items
     for product in products:
         items.append(product.product_name)
@@ -51,7 +52,6 @@ def homepage():
     recommended = min(totals) 
     not_recommended = max(totals)
         
-    
     # Cost per Item
     for idx,item in enumerate(items):
         cost_per_item[item] = []
