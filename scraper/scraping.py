@@ -10,7 +10,7 @@ stores = ['NTUC', 'COLD STORAGE', 'ISETAN']
 # Products to scrape
 products = ['oreo original', "lay's classic", 'camel roasted peanuts', 'lindor cornet milk', 'ruffles original', 'anchor strong beer']
 # Connect to database
-conn = sqlite3.connect('../../instance/products.db')
+conn = sqlite3.connect('../instance/products.db')
 curs = conn.cursor()
 
 def main():
@@ -47,7 +47,7 @@ def get_price_ntuc(idx, item):
     # Get html text from website
     html_text = requests.get(ntuc + item).text
     soup = BeautifulSoup(html_text, 'lxml')
-    matches = [4, 0, 0, 0, 0, 0]
+    matches = [0, 2, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:

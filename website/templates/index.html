@@ -1,8 +1,22 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Intella
+  Intella
 {% endblock%}
+
+{% block form %}
+<form action="/" method="post">
+  <div class="mb-3">
+      <select class="form-select mx-auto w-auto text-center" name="number_of_products">
+      <option disabled selected>Number of products</option>
+      {%for i in range(6)%}
+          <option value={{i}}>{{i+1}}</option>
+      {%endfor%}
+      </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Submit</button>
+</form>
+{% endblock %}
 
 {% block main %}
     
@@ -48,7 +62,6 @@
           <table class="table text-white table-dark">
             <thead>
               <tr>
-                <th scope="col">#</th>
                 <th scope="col">Store</th>
                 <th scope="col">Total</th>
               </tr>
@@ -62,7 +75,6 @@
                 {% else %}
                 <tr>
                 {% endif %}
-                <th scope="row">{{loop.index}}</th>
                 <th scope="row">{{store_names[loop.index0]}}</th>
                 <td>${{total| round(2)}}</td>
               </tr>

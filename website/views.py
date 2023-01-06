@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, redirect
 from . import db
 import sys
 
@@ -7,7 +7,7 @@ images = ['https://media.nedigital.sg/fairprice/fpol/media/images/product/L/1301
           , 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13010730_L1_20221021.jpg?q=60', 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/12006645_L1_20220920.jpg?q=60',
           'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/11880752_L1_20221211.jpg?q=60', 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13018295_L1_20220427.jpg?q=60']
         
-@views.route('/')
+@views.route('/', methods=['GET', 'POST'])
 def homepage():
     # Retrieve all products from database
     from .model import Prices, Stores, Products
@@ -19,7 +19,13 @@ def homepage():
     totals = []
     cost_per_item = {}
     
-    
+    if request.method == 'POST':
+        number_of_products = request.form.get('number_of_products')
+        
+        if not number_of_products:
+            return redirect('/')
+        
+        products = products[:int(number_of_products)+1]
     # Obtain list of all items
     for product in products:
         items.append(product.product_name)
