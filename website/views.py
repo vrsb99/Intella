@@ -30,7 +30,21 @@ def homepage():
         
     # Obtain total prices for each shop
     for idx,shop in enumerate(shops):
-        totals.append(sum([price.price for price in prices if price.store_id == idx and price.product_id < len(items)]))
+        total = 0
+        counter = 0
+        length  = len(items)
+        
+        for price in prices:
+            if price.store_id == idx and price.product_id < length:
+                total += price.price 
+                counter += 1
+
+        if counter == length:
+            totals.append(total)
+
+    recommended = min(totals) 
+    not_recommended = max(totals)
+        
     
     # Cost per Item
     for idx,item in enumerate(items):
@@ -41,4 +55,4 @@ def homepage():
             if price.product_id == idx:
                 cost_per_item[item].append(price.price)
             
-    return render_template('index.html', items=items, store_names=shops, total_per_store=totals, images=images, cost_per_item=cost_per_item)
+    return render_template('index.html', items=items, store_names=shops, total_per_store=totals, images=images, cost_per_item=cost_per_item, recommended=recommended, not_recommended=not_recommended)

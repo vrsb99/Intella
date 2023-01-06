@@ -55,7 +55,13 @@
             </thead>
             <tbody>
                 {% for total in total_per_store%}
-              <tr>
+                {% if total == recommended %}
+                <tr class="table-success">
+                {% elif total == not_recommended %}
+                <tr class="table-danger">
+                {% else %}
+                <tr>
+                {% endif %}
                 <th scope="row">{{loop.index}}</th>
                 <th scope="row">{{store_names[loop.index0]}}</th>
                 <td>${{total| round(2)}}</td>
