@@ -7,22 +7,16 @@ ntuc = 'https://www.fairprice.com.sg/search?query='
 cold_storage = 'https://coldstorage.com.sg/search?q='
 isetan = 'https://www.isetan.com.sg/catalogsearch/result/?q='
 stores = ['NTUC', 'COLD STORAGE', 'ISETAN']
+
 # Products to scrape
 products = ['oreo original', "lay's classic", 'camel roasted peanuts', 'lindor cornet milk', 'ruffles original', 'anchor strong beer']
+
 # Connect to database
 conn = sqlite3.connect('../instance/products.db')
 curs = conn.cursor()
 
 def main():
-    # Reset database
-    curs.execute('DROP TABLE IF EXISTS products')
-    curs.execute('DROP TABLE IF EXISTS stores')
-    curs.execute('DROP TABLE IF EXISTS prices')
-    conn.commit()
-    curs.execute('CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY, product_name TEXT NOT NULL)')
-    curs.execute('CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY, store_name TEXT NOT NULL)')
-    curs.execute('CREATE TABLE prices (id INTEGER NOT NULL PRIMARY KEY, product_id INTEGER NOT NULL, store_id INTEGER NOT NULL, price NUMERIC NOT NULL, FOREIGN KEY(product_id) REFERENCES products(id), FOREIGN KEY(store_id) REFERENCES stores(id))')
-    conn.commit()
+    reset_database()
     
     for store in stores:
         # Insert stores into database
@@ -138,10 +132,20 @@ def get_price_isetan(idx, item):
 
      
 def insert_database(product_id, store, price):
-    # Insert into database
     print("Writing to database")
     curs.execute('INSERT INTO prices(product_id, store_id, price) VALUES (?, ?, ?)', (product_id, store, price))
     conn.commit()
+    
+def reset_database():
+    curs.execute('DROP TABLE IF EXISTS products')
+    curs.execute('DROP TABLE IF EXISTS stores')
+    curs.execute('DROP TABLE IF EXISTS prices')
+    conn.commit()
+    curs.execute('CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY, product_name TEXT NOT NULL)')
+    curs.execute('CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY, store_name TEXT NOT NULL)')
+    curs.execute('CREATE TABLE prices (id INTEGER NOT NULL PRIMARY KEY, product_id INTEGER NOT NULL, store_id INTEGER NOT NULL, price NUMERIC NOT NULL, FOREIGN KEY(product_id) REFERENCES products(id), FOREIGN KEY(store_id) REFERENCES stores(id))')
+    conn.commit()
+    
                                                     
 if __name__ == '__main__':
     main()
