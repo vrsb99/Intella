@@ -3,46 +3,42 @@ from . import db
 import sys
 
 views = Blueprint('views', __name__)
-items = ['Oreo Original', "Lay's Classic", 'Camel Roasted Peanuts', 'Lindor Milk', 'Ruffles Original', 'Anchor Strong Beer']
-
-class Item:
-    def __init__(self, name, ntuc, store):
-        self.name = name
-        self.ntuc = price
-        self.store = store
+images = ['https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13012296_L1_20220706.jpg?q=60','https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13218718_L1_20221228.jpg?q=60'
+          , 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13010730_L1_20221021.jpg?q=60', 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/12006645_L1_20220920.jpg?q=60',
+          'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/11880752_L1_20221211.jpg?q=60', 'https://media.nedigital.sg/fairprice/fpol/media/images/product/L/13018295_L1_20220427.jpg?q=60']
         
 @views.route('/')
 def homepage():
     # Retrieve all products from database
-    from .model import Products
+    from .model import Prices, Stores, Products
     products = Products.query.all()
-    total_per_store = {}
+    stores = Stores.query.all()
+    prices = Prices.query.all()
+    items = []
+    shops = []
+    totals = []
     cost_per_item = {}
-    store_names = []
-    item_range = len(items)
     
     
-    for i in range(6):
-        cost_per_item[items[i]] = []
+    # Obtain list of all items
+    for product in products:
+        items.append(product.product_name)
         
-        for product in products:
-            
-            if product.productID == i:
-                cost_per_item[items[i]].append(product.price)
-                
-                if product.store not in store_names:
-                    store_names.append(product.store)
-                    
-                if product.store in total_per_store: 
-                    total_per_store[product.store] += product.price
-                else:
-                    total_per_store[product.store] = product.price
+    # Obtain list of all shops
+    for store in stores:
+        shops.append(store.store_name)
+        
+    # Obtain total prices for each shop
+    for idx,shop in enumerate(shops):
+        totals.append(sum([price.price for price in prices if price.store_id == idx and price.product_id < len(items)]))
     
-    # Compare total prices
-    
+    # Cost per Item
+    for idx,item in enumerate(items):
+        cost_per_item[item] = []
+        
+        for price in prices:
             
-    print(cost_per_item, file=sys.stderr)
-    print(store_names, file=sys.stderr)
-    print(total_per_store, file=sys.stderr)
+            if price.product_id == idx:
+                cost_per_item[item].append(price.price)
             
-    return render_template('index.html', cost_per_item=cost_per_item, store_names=store_names, total_per_store=total_per_store)
+    return render_template('index.html', items=items, store_names=shops, total_per_store=totals, images=images, cost_per_item=cost_per_item)

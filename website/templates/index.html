@@ -7,11 +7,12 @@
 {% block main %}
     
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-        {% for product_name in cost_per_item %}
+        {% for item in items %}
         <div class="col">
         <div class="card text-white bg-dark mb-3">
-            <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+            <img src="{{images[loop.index0]}}" class="bd-placeholder-img card-img-top" width="100%" height="225" style="object-fit: contain">
             <div class="card-body">
+                <h5 class="card-title text-center text-primary">{{product_name}}</h5>
                 <div class="d-flex justify-content-between align-items-center">
                     <table class="table table-sm table-dark">
                         <thead>
@@ -24,8 +25,8 @@
                             {% for store in store_names %}
                         <tr>
                             <th scope="row">{{store}}</th>
-                            {% if cost_per_item[product_name][loop.index0] %}
-                            <td>${{cost_per_item[product_name][loop.index0]}}</td>
+                            {% if cost_per_item[item][loop.index0] %}
+                            <td>${{cost_per_item[item][loop.index0]}}</td>
                             {% else %}
                             <td>NA</td>
                             {% endif %}
@@ -53,11 +54,11 @@
               </tr>
             </thead>
             <tbody>
-                {% for store in store_names%}
+                {% for total in total_per_store%}
               <tr>
                 <th scope="row">{{loop.index}}</th>
-                <th scope="row">{{store}}</th>
-                <td>${{total_per_store[store]| round(2)}}</td>
+                <th scope="row">{{store_names[loop.index0]}}</th>
+                <td>${{total| round(2)}}</td>
               </tr>
                 {% endfor %}
             </tbody>

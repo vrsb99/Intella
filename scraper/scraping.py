@@ -6,6 +6,7 @@ import sqlite3
 ntuc = 'https://www.fairprice.com.sg/search?query='
 cold_storage = 'https://coldstorage.com.sg/search?q='
 isetan = 'https://www.isetan.com.sg/catalogsearch/result/?q='
+stores = ['NTUC', 'COLD STORAGE', 'ISETAN']
 # Products to scrape
 products = ['oreo original', "lay's classic", 'camel roasted peanuts', 'lindor cornet milk', 'ruffles original', 'anchor strong beer']
 # Connect to database
@@ -14,10 +15,25 @@ curs = conn.cursor()
 
 def main():
     # Reset database
-    curs.execute('DELETE FROM products')
+    curs.execute('DROP TABLE IF EXISTS products')
+    curs.execute('DROP TABLE IF EXISTS stores')
+    curs.execute('DROP TABLE IF EXISTS prices')
+    conn.commit()
+    curs.execute('CREATE TABLE products (id INTEGER NOT NULL PRIMARY KEY, product_name TEXT NOT NULL)')
+    curs.execute('CREATE TABLE stores (id INTEGER NOT NULL PRIMARY KEY, store_name TEXT NOT NULL)')
+    curs.execute('CREATE TABLE prices (id INTEGER NOT NULL PRIMARY KEY, product_id INTEGER NOT NULL, store_id INTEGER NOT NULL, price NUMERIC NOT NULL, FOREIGN KEY(product_id) REFERENCES products(id), FOREIGN KEY(store_id) REFERENCES stores(id))')
     conn.commit()
     
+    for store in stores:
+        # Insert stores into database
+        curs.execute('INSERT INTO stores (store_name) VALUES (?)', (store,))
+        conn.commit()
+    
     for idx, product in enumerate(products):
+        # Insert product into database
+        curs.execute('INSERT INTO products (product_name) VALUES (?)', (product.capitalize(),))
+        conn.commit()
+        
         print('\nNTUC:')
         get_price_ntuc(idx, product)
         print('\nCOLD STORAGE:')
@@ -48,7 +64,7 @@ def get_price_ntuc(idx, item):
 
                 if matches[idx] == index:
                     print('Match found')
-                    insert_database(name, 'NTUC', price, idx)
+                    insert_database(idx, 0, price)
     except:
         print('No products found')
 
@@ -86,7 +102,7 @@ def get_price_cold_storage(idx, item):
                 
                 if matches[idx] == index:
                     print('Match found')
-                    insert_database(name, 'Cold Storage', price, idx)
+                    insert_database(idx, 1, price)
     except:
         print('No products found')
     
@@ -114,17 +130,17 @@ def get_price_isetan(idx, item):
                 
                 if index == 0:
                     print('Match found')
-                    insert_database(name, 'Isetan', price, idx)
+                    insert_database(idx, 2, price)
                 
                 
     except:
         print('No products found')
 
      
-def insert_database(productName, store, price, productID):
+def insert_database(product_id, store, price):
     # Insert into database
     print("Writing to database")
-    curs.execute('INSERT INTO products(productName, store, price, productID) VALUES (?, ?, ?, ?)', (productName, store, price, productID))
+    curs.execute('INSERT INTO prices(product_id, store_id, price) VALUES (?, ?, ?)', (product_id, store, price))
     conn.commit()
                                                     
 if __name__ == '__main__':
