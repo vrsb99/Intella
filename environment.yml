@@ -1,0 +1,10 @@
+name: flask
+channels:
+  - defaults
+dependencies:
+  - python=3.10.6
+  - flask
+  - flask-sqlalchemy
+  - beautifulsoup4
+  - lxml
+  - requests
