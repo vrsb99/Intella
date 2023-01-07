@@ -1,4 +1,4 @@
-# Intella @ Escendo23
+# Intella
 💻[Live Site](https://intella.herokuapp.com/)
 
 
