@@ -42,7 +42,7 @@ def get_price_ntuc(idx, item):
     # Get html text from website
     html_text = requests.get(ntuc + item).text
     soup = BeautifulSoup(html_text, 'lxml')
-    matches = [4, 2, 0, 0, 0, 0]
+    matches = [0, 2, 0, 0, 0, 0]
     
     # Get product name, price and weight
     try:
